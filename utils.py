@@ -96,29 +96,25 @@ def random_team_assignment(
 
 
 def evaluate_solution(
-    teams: list[dict], waggings, low_c_threshold=0.5, w_n=1.0, w_e=1.0, w_c=3.0
+    teams: list[dict],
+    waggings,
+    low_c_threshold=0.5,
+    w_n=1.0,
+    w_e=1.0,
+    w_c=2.0,
+    w_wagging=3.0,
 ):
     """
-    teams: [
-        {
-            id: 1,
-            pm: [{}, {}, {}],
-            de: [{}, {}] ....
-        }
-    ]
+    최종적으로 반환해야 하는 값:
+    - 팀 내에서 서로에게 꼬리를 흔든 쌍의 개수
+    - (각 팀에서 꼬리를 흔든 사람이 얼마나 속해있는지)
+
+    - 팀의 외향성 평균이 어떤지
+    - 성실도의 평균이 어떤지
+    - 각 팀의 성격 유형 통계를 정리한 뒤, LLM에게 설명을 맡김
     """
 
-    wagging_dict: dict[int, set] = {}  # {wagger_id: (꼬리를 흔든 사람 목록)}
-    for wagging in waggings:
-        wagger, waggee = wagging["wagger"], wagging["waggee"]
-        if wagger not in wagging_dict:
-            wagging_dict[wagger] = set([waggee])
-        else:
-            wagging_dict[wagger].add(waggee)
-
-    team_n_means = []  # 팀별 N 값 평균
-    team_e_stds = []  # 팀별 E 값 표준편차
-    team_c_counts = []  # 높은 C 값을 가진 사람이 몇 명인지
+    wagging_dict: dict[int, set] = _get_wagging_dict(waggings)
 
     for team in teams:
         team_members = []
@@ -127,16 +123,39 @@ def evaluate_solution(
         e_list = []
         c_list = []
         for part in PART_MIN.keys():
-            team_members.append(team[part])
+            team_members.extend(team[part])
 
-        team_member_ids = set([member["id"] for member in team_members])
+        team_members_id = set([member["id"] for member in team_members])
+
+        # wagging 몇 개 성공했는지 계산 ------------------------------------------------------------------------------------
+        single_wagging_count = 0
+        double_wagging_count = 0
+
+        for member1_id in team_members_id:
+            if member1_id not in wagging_dict:  # 꼬리를 아무에게도 흔들지 않은 사람
+                continue
+
+            member1_waggees_id = wagging_dict[member1_id]
+            for member2_id in team_members_id:
+                if member1_id == member2_id:
+                    continue
+                if member2_id not in member1_waggees_id:
+                    continue
+
+                if (
+                    member2_id in wagging_dict
+                    and member1_id in wagging_dict[member2_id]
+                ):  # 양방향 wagging
+                    double_wagging_count += 1
+                else:  # 단방향 wagging
+                    single_wagging_count += 1
+
+        # 성격 유형 계산 ------------------------------------------------------------------------------------
+        team_n_means = []  # 팀별 N 값 평균
+        team_e_stds = []  # 팀별 E 값 표준편차
+        team_c_counts = []  # 높은 C 값을 가진 사람이 몇 명인지
 
         for member in team_members:
-            my_waggees = wagging_dict[member["id"]]
-            waggees_count = my_waggees.intersection(
-                team_member_ids
-            )  # 꼬리 흔든 사람이 몇 명 있나?
-
             n_list.append(member["neuroticism"])
             e_list.append(member["extraversion"])
             c_list.append(member["conscientiousness"])
@@ -155,7 +174,12 @@ def evaluate_solution(
 
     c_penalty = 1 if sum(team_c_counts) == 0 else 0
 
-    score = w_n * n_var + w_e * e_mean + c_penalty * w_c
+    wagging_score = -(single_wagging_count + 2 * double_wagging_count)
+
+    # 각 팀의 N 평균의 분산 최소화
+    # 각 팀의 E 표준편차의 평균 최소화
+    # 각 팀에 성실도가 높은 사람이 적어도 한 명
+    score = w_n * n_var + w_e * e_mean + c_penalty * w_c + w_wagging * wagging_score
     return score
 
 
@@ -248,3 +272,17 @@ def simulated_annealing(
         iteration += 1
 
     return best_solution, best_score
+
+
+def _get_wagging_dict(waggings):
+    """
+    Wagging 테이블 데이터를 받아서 {꼬리 흔들기 주체: [꼬리를 흔든 대상 리스트]} 형식으로 변환
+    """
+    wagging_dict: dict[int, set] = {}  # {wagger_id: (꼬리를 흔든 사람 목록)}
+    for wagging in waggings:
+        wagger, waggee = wagging["wagger"], wagging["waggee"]
+        if wagger not in wagging_dict:
+            wagging_dict[wagger] = set([waggee])
+        else:
+            wagging_dict[wagger].add(waggee)
+    return wagging_dict
