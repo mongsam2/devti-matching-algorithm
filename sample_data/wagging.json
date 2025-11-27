@@ -1,0 +1,173 @@
+[
+  { "id": 1, "wagger": 1, "waggee": 9 },
+  { "id": 2, "wagger": 1, "waggee": 12 },
+  { "id": 3, "wagger": 1, "waggee": 27 },
+  { "id": 4, "wagger": 1, "waggee": 7 },
+
+  { "id": 5, "wagger": 2, "waggee": 14 },
+  { "id": 6, "wagger": 2, "waggee": 1 },
+  { "id": 7, "wagger": 2, "waggee": 20 },
+  { "id": 8, "wagger": 2, "waggee": 32 },
+  { "id": 9, "wagger": 2, "waggee": 6 },
+
+  { "id": 10, "wagger": 3, "waggee": 15 },
+  { "id": 11, "wagger": 3, "waggee": 30 },
+  { "id": 12, "wagger": 3, "waggee": 8 },
+
+  { "id": 13, "wagger": 4, "waggee": 18 },
+  { "id": 14, "wagger": 4, "waggee": 5 },
+  { "id": 15, "wagger": 4, "waggee": 31 },
+  { "id": 16, "wagger": 4, "waggee": 22 },
+
+  { "id": 17, "wagger": 5, "waggee": 13 },
+  { "id": 18, "wagger": 5, "waggee": 26 },
+  { "id": 19, "wagger": 5, "waggee": 9 },
+  { "id": 20, "wagger": 5, "waggee": 1 },
+  { "id": 21, "wagger": 5, "waggee": 19 },
+  { "id": 22, "wagger": 5, "waggee": 24 },
+
+  { "id": 23, "wagger": 6, "waggee": 10 },
+  { "id": 24, "wagger": 6, "waggee": 21 },
+  { "id": 25, "wagger": 6, "waggee": 4 },
+  { "id": 26, "wagger": 6, "waggee": 30 },
+
+  { "id": 27, "wagger": 7, "waggee": 17 },
+  { "id": 28, "wagger": 7, "waggee": 3 },
+  { "id": 29, "wagger": 7, "waggee": 14 },
+  { "id": 30, "wagger": 7, "waggee": 20 },
+
+  { "id": 31, "wagger": 8, "waggee": 4 },
+  { "id": 32, "wagger": 8, "waggee": 11 },
+  { "id": 33, "wagger": 8, "waggee": 16 },
+  { "id": 34, "wagger": 8, "waggee": 27 },
+  { "id": 35, "wagger": 8, "waggee": 6 },
+
+  { "id": 36, "wagger": 9, "waggee": 1 },
+  { "id": 37, "wagger": 9, "waggee": 33 },
+  { "id": 38, "wagger": 9, "waggee": 24 },
+  { "id": 39, "wagger": 9, "waggee": 17 },
+
+  { "id": 40, "wagger": 10, "waggee": 5 },
+  { "id": 41, "wagger": 10, "waggee": 22 },
+  { "id": 42, "wagger": 10, "waggee": 3 },
+  { "id": 43, "wagger": 10, "waggee": 14 },
+
+  { "id": 44, "wagger": 11, "waggee": 23 },
+  { "id": 45, "wagger": 11, "waggee": 9 },
+  { "id": 46, "wagger": 11, "waggee": 15 },
+  { "id": 47, "wagger": 11, "waggee": 6 },
+
+  { "id": 48, "wagger": 12, "waggee": 1 },
+  { "id": 49, "wagger": 12, "waggee": 8 },
+  { "id": 50, "wagger": 12, "waggee": 19 },
+
+  { "id": 51, "wagger": 13, "waggee": 30 },
+  { "id": 52, "wagger": 13, "waggee": 9 },
+  { "id": 53, "wagger": 13, "waggee": 4 },
+  { "id": 54, "wagger": 13, "waggee": 17 },
+  { "id": 55, "wagger": 13, "waggee": 2 },
+  { "id": 56, "wagger": 13, "waggee": 1 },
+
+  { "id": 57, "wagger": 14, "waggee": 5 },
+  { "id": 58, "wagger": 14, "waggee": 12 },
+  { "id": 59, "wagger": 14, "waggee": 21 },
+
+  { "id": 60, "wagger": 15, "waggee": 3 },
+  { "id": 61, "wagger": 15, "waggee": 28 },
+  { "id": 62, "wagger": 15, "waggee": 10 },
+  { "id": 63, "wagger": 15, "waggee": 25 },
+
+  { "id": 64, "wagger": 16, "waggee": 2 },
+  { "id": 65, "wagger": 16, "waggee": 19 },
+  { "id": 66, "wagger": 16, "waggee": 24 },
+  { "id": 67, "wagger": 16, "waggee": 13 },
+
+  { "id": 68, "wagger": 17, "waggee": 7 },
+  { "id": 69, "wagger": 17, "waggee": 8 },
+  { "id": 70, "wagger": 17, "waggee": 30 },
+  { "id": 71, "wagger": 17, "waggee": 33 },
+  { "id": 72, "wagger": 17, "waggee": 11 },
+
+  { "id": 73, "wagger": 18, "waggee": 4 },
+  { "id": 74, "wagger": 18, "waggee": 29 },
+  { "id": 75, "wagger": 18, "waggee": 10 },
+
+  { "id": 76, "wagger": 19, "waggee": 6 },
+  { "id": 77, "wagger": 19, "waggee": 8 },
+  { "id": 78, "wagger": 19, "waggee": 22 },
+  { "id": 79, "wagger": 19, "waggee": 32 },
+
+  { "id": 80, "wagger": 20, "waggee": 12 },
+  { "id": 81, "wagger": 20, "waggee": 7 },
+  { "id": 82, "wagger": 20, "waggee": 29 },
+  { "id": 83, "wagger": 20, "waggee": 3 },
+  { "id": 84, "wagger": 20, "waggee": 31 },
+  { "id": 85, "wagger": 20, "waggee": 26 },
+
+  { "id": 86, "wagger": 21, "waggee": 14 },
+  { "id": 87, "wagger": 21, "waggee": 2 },
+  { "id": 88, "wagger": 21, "waggee": 9 },
+
+  { "id": 89, "wagger": 22, "waggee": 5 },
+  { "id": 90, "wagger": 22, "waggee": 18 },
+  { "id": 91, "wagger": 22, "waggee": 28 },
+  { "id": 92, "wagger": 22, "waggee": 30 },
+  { "id": 93, "wagger": 22, "waggee": 16 },
+
+  { "id": 94, "wagger": 23, "waggee": 6 },
+  { "id": 95, "wagger": 23, "waggee": 15 },
+  { "id": 96, "wagger": 23, "waggee": 1 },
+  { "id": 97, "wagger": 23, "waggee": 33 },
+
+  { "id": 98, "wagger": 24, "waggee": 5 },
+  { "id": 99, "wagger": 24, "waggee": 13 },
+  { "id": 100, "wagger": 24, "waggee": 12 },
+  { "id": 101, "wagger": 24, "waggee": 25 },
+
+  { "id": 102, "wagger": 25, "waggee": 3 },
+  { "id": 103, "wagger": 25, "waggee": 17 },
+  { "id": 104, "wagger": 25, "waggee": 24 },
+
+  { "id": 105, "wagger": 26, "waggee": 1 },
+  { "id": 106, "wagger": 26, "waggee": 7 },
+  { "id": 107, "wagger": 26, "waggee": 14 },
+  { "id": 108, "wagger": 26, "waggee": 30 },
+
+  { "id": 109, "wagger": 27, "waggee": 3 },
+  { "id": 110, "wagger": 27, "waggee": 19 },
+  { "id": 111, "wagger": 27, "waggee": 8 },
+  { "id": 112, "wagger": 27, "waggee": 32 },
+  { "id": 113, "wagger": 27, "waggee": 14 },
+
+  { "id": 114, "wagger": 28, "waggee": 12 },
+  { "id": 115, "wagger": 28, "waggee": 4 },
+  { "id": 116, "wagger": 28, "waggee": 23 },
+  { "id": 117, "wagger": 28, "waggee": 10 },
+
+  { "id": 118, "wagger": 29, "waggee": 18 },
+  { "id": 119, "wagger": 29, "waggee": 31 },
+  { "id": 120, "wagger": 29, "waggee": 2 },
+  { "id": 121, "wagger": 29, "waggee": 30 },
+
+  { "id": 122, "wagger": 30, "waggee": 6 },
+  { "id": 123, "wagger": 30, "waggee": 13 },
+  { "id": 124, "wagger": 30, "waggee": 22 },
+  { "id": 125, "wagger": 30, "waggee": 1 },
+
+  { "id": 126, "wagger": 31, "waggee": 11 },
+  { "id": 127, "wagger": 31, "waggee": 3 },
+  { "id": 128, "wagger": 31, "waggee": 25 },
+  { "id": 129, "wagger": 31, "waggee": 7 },
+
+  { "id": 130, "wagger": 32, "waggee": 22 },
+  { "id": 131, "wagger": 32, "waggee": 15 },
+  { "id": 132, "wagger": 32, "waggee": 28 },
+  { "id": 133, "wagger": 32, "waggee": 4 },
+
+  { "id": 134, "wagger": 33, "waggee": 9 },
+  { "id": 135, "wagger": 33, "waggee": 12 },
+  { "id": 136, "wagger": 33, "waggee": 2 },
+  { "id": 137, "wagger": 33, "waggee": 31 },
+  { "id": 138, "wagger": 33, "waggee": 24 },
+  { "id": 139, "wagger": 33, "waggee": 18 }
+]
