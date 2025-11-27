@@ -1,220 +1,276 @@
 import streamlit as st
-import pandas as pd
 import json
-import random
-import math
+import plotly.express as px
+import plotly.graph_objects as go
+import pandas as pd
+from matching import random_team_assignment, simulated_annealing, evaluate_solution
+from category import get_category_score
+from wagging import get_wagging_score
 
-from utils import (
-    get_team_size,
-    random_team_assignment,
-    evaluate_solution,
-    neighbor_solution,
-    simulated_annealing,
-)
-
-st.title("DevTI 팀 매팅 알고리즘 테스트")
+# 페이지 설정
+st.set_page_config(page_title="팀 매칭 알고리즘 데모", layout="wide")
 
 
-def load_sample_data(file_name):
-    with open(file_name, encoding="utf-8") as f:
-        data = json.load(f)
-    return data
+# 데이터 로드
+@st.cache_data
+def load_data():
+    with open("sample_data/participant.json", "r", encoding="utf-8") as f:
+        participants = json.load(f)
+    with open("sample_data/wagging.json", "r", encoding="utf-8") as f:
+        waggings = json.load(f)
+    return participants, waggings
 
 
-def display_team_members(team, teams_info):
-    """팀원의 모든 정보를 테이블 형식으로 표시"""
-    team_id = team["id"]
-    members_data = []
-    members_list = []
+participants, waggings = load_data()
 
-    for part in teams_info[0].keys():
-        for member in team.get(part, []):
-            members_data.append(
-                {
-                    "ID": member["id"],
-                    "파트": part,
-                    "외향성": f"{member.get('extraversion', 0):.3f}",
-                    "신경증": f"{member.get('neuroticism', 0):.3f}",
-                    "성실도": f"{member.get('conscientiousness', 0):.3f}",
-                    "개방성": f"{member.get('openness', 0):.3f}",
-                    "친화성": f"{member.get('agreeableness', 0):.3f}",
+st.title("🎯 팀 매칭 알고리즘 데모")
+st.markdown("---")
+
+# 사전 통계 섹션
+st.header("📊 매칭 전 참가자 통계")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("파트별 분포")
+    part_counts = {}
+    for p in participants:
+        part = p["part"]
+        part_counts[part] = part_counts.get(part, 0) + 1
+
+    fig_part = px.pie(
+        values=list(part_counts.values()),
+        names=list(part_counts.keys()),
+        title="참가자 파트 분포",
+    )
+    st.plotly_chart(fig_part, use_container_width=True)
+
+with col2:
+    st.subheader("팀 분위기 선호도")
+    vibe_counts = {}
+    for p in participants:
+        vibe = p["team_vibe"]
+        vibe_counts[vibe] = vibe_counts.get(vibe, 0) + 1
+
+    fig_vibe = px.pie(
+        values=list(vibe_counts.values()),
+        names=list(vibe_counts.keys()),
+        title="팀 분위기 선호도 분포",
+    )
+    st.plotly_chart(fig_vibe, use_container_width=True)
+
+col3, col4 = st.columns(2)
+
+with col3:
+    st.subheader("활동 시간대 선호도")
+    hours_counts = {}
+    for p in participants:
+        hours = p["active_hours"]
+        hours_counts[hours] = hours_counts.get(hours, 0) + 1
+
+    fig_hours = px.pie(
+        values=list(hours_counts.values()),
+        names=list(hours_counts.keys()),
+        title="활동 시간대 분포",
+    )
+    st.plotly_chart(fig_hours, use_container_width=True)
+
+with col4:
+    st.subheader("회의 방식 선호도")
+    meeting_counts = {}
+    for p in participants:
+        meeting = p["meeting_preference"]
+        meeting_counts[meeting] = meeting_counts.get(meeting, 0) + 1
+
+    fig_meeting = px.pie(
+        values=list(meeting_counts.values()),
+        names=list(meeting_counts.keys()),
+        title="회의 방식 선호도 분포",
+    )
+    st.plotly_chart(fig_meeting, use_container_width=True)
+
+st.markdown("---")
+
+# 매칭 실행 버튼
+st.header("🚀 팀 매칭 실행")
+
+if st.button("매칭 시작", type="primary", use_container_width=True):
+    with st.spinner("매칭 알고리즘 실행 중..."):
+        # 초기 랜덤 매칭
+        initial_teams = random_team_assignment(participants)
+        initial_score = evaluate_solution(initial_teams, waggings)
+
+        # 최적화된 매칭
+        optimized_teams, optimized_score = simulated_annealing(
+            initial_teams,
+            waggings=waggings,
+            initial_temp=1.0,
+            min_temp=0.001,
+            cooling_rate=0.995,
+            max_iterations=10000,
+        )
+
+        # 세션 상태에 저장
+        st.session_state["initial_teams"] = initial_teams
+        st.session_state["initial_score"] = initial_score
+        st.session_state["optimized_teams"] = optimized_teams
+        st.session_state["optimized_score"] = optimized_score
+        st.session_state["matching_done"] = True
+
+    st.success("매칭 완료!")
+    st.rerun()
+
+# 매칭 결과 표시
+if st.session_state.get("matching_done", False):
+    st.markdown("---")
+    st.header("📈 매칭 결과 분석")
+
+    initial_teams = st.session_state["initial_teams"]
+    initial_score = st.session_state["initial_score"]
+    optimized_teams = st.session_state["optimized_teams"]
+    optimized_score = st.session_state["optimized_score"]
+
+    # 점수 비교
+    st.subheader("🎯 매칭 점수 비교")
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric("초기 매칭 점수", f"{initial_score:.4f}")
+    with col2:
+        st.metric("최적화 후 점수", f"{optimized_score:.4f}")
+    with col3:
+        if initial_score != 0:
+            improvement = ((initial_score - optimized_score) / abs(initial_score)) * 100
+            st.metric("개선율", f"{improvement:.2f}%")
+        else:
+            st.metric("개선율", "N/A")
+
+    # 팀별 점수 비교
+    st.subheader("팀별 점수 상세 비교")
+
+    initial_category_scores = get_category_score(initial_teams)
+    optimized_category_scores = get_category_score(optimized_teams)
+
+    initial_wagging_scores = get_wagging_score(initial_teams, waggings)
+    optimized_wagging_scores = get_wagging_score(optimized_teams, waggings)
+
+    score_df = pd.DataFrame(
+        {
+            "팀": [f"Team {i+1}" for i in range(len(initial_teams))],
+            "초기 카테고리 점수": initial_category_scores,
+            "최적화 카테고리 점수": optimized_category_scores,
+            "초기 꼬리흔들기 점수": initial_wagging_scores,
+            "최적화 꼬리흔들기 점수": optimized_wagging_scores,
+        }
+    )
+
+    st.dataframe(score_df, use_container_width=True)
+
+    # 각 팀별 상세 정보
+    st.markdown("---")
+    st.header("👥 팀별 상세 정보")
+
+    for team_idx, team in enumerate(optimized_teams):
+        with st.expander(f"Team {team_idx + 1} 상세 정보"):
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # 파트 분포
+                st.subheader("파트 분포")
+                team_parts = {}
+                for member in team:
+                    part = member["part"]
+                    team_parts[part] = team_parts.get(part, 0) + 1
+
+                fig_team_part = px.bar(
+                    x=list(team_parts.keys()),
+                    y=list(team_parts.values()),
+                    labels={"x": "파트", "y": "인원 수"},
+                    title=f"Team {team_idx + 1} 파트 구성",
+                )
+                st.plotly_chart(fig_team_part, use_container_width=True)
+
+                # 선호도 일치율
+                st.subheader("선호도 일치율")
+                vibe_match = {}
+                hours_match = {}
+                meeting_match = {}
+
+                for member in team:
+                    vibe = member["team_vibe"]
+                    hours = member["active_hours"]
+                    meeting = member["meeting_preference"]
+
+                    vibe_match[vibe] = vibe_match.get(vibe, 0) + 1
+                    hours_match[hours] = hours_match.get(hours, 0) + 1
+                    meeting_match[meeting] = meeting_match.get(meeting, 0) + 1
+
+                match_df = pd.DataFrame(
+                    {
+                        "카테고리": ["Team Vibe", "Active Hours", "Meeting Preference"],
+                        "최다 선호": [
+                            max(vibe_match, key=vibe_match.get),
+                            max(hours_match, key=hours_match.get),
+                            max(meeting_match, key=meeting_match.get),
+                        ],
+                        "일치 인원": [
+                            max(vibe_match.values()),
+                            max(hours_match.values()),
+                            max(meeting_match.values()),
+                        ],
+                        "일치율 (%)": [
+                            f"{max(vibe_match.values()) / len(team) * 100:.1f}",
+                            f"{max(hours_match.values()) / len(team) * 100:.1f}",
+                            f"{max(meeting_match.values()) / len(team) * 100:.1f}",
+                        ],
+                    }
+                )
+                st.dataframe(match_df, use_container_width=True)
+
+            with col2:
+                # 성격 유형 분포
+                st.subheader("평균 성격 특성")
+                personality_traits = {
+                    "openness": [],
+                    "conscientiousness": [],
+                    "extraversion": [],
+                    "agreeableness": [],
+                    "neuroticism": [],
                 }
-            )
-            members_list.append(member)
 
-    if members_data:
-        df = pd.DataFrame(members_data)
-        st.dataframe(df, use_container_width=True, hide_index=True)
+                for member in team:
+                    for trait in personality_traits.keys():
+                        personality_traits[trait].append(member[trait])
 
-        # 각 팀원의 성격 설명 표시
-        st.write("**성격 설명**")
-        for member in members_list:
-            with st.expander(f"팀원 {member['id']} - {member['part'].upper()}"):
-                st.write(member.get("personality", "설명이 없습니다."))
-    else:
-        st.write("팀원이 없습니다.")
+                avg_traits = {
+                    trait: sum(values) / len(values)
+                    for trait, values in personality_traits.items()
+                }
 
+                fig_personality = go.Figure(
+                    data=go.Scatterpolar(
+                        r=list(avg_traits.values()),
+                        theta=["개방성", "성실성", "외향성", "친화성", "신경성"],
+                        fill="toself",
+                    )
+                )
+                fig_personality.update_layout(
+                    polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+                    title=f"Team {team_idx + 1} 평균 성격 특성",
+                )
+                st.plotly_chart(fig_personality, use_container_width=True)
 
-participant_data = load_sample_data("participant_sample.json")
-wagging_data = load_sample_data("wagging_sample.json")
-
-st.subheader("테스트 데이터 원본")
-st.write(pd.DataFrame(participant_data).set_index("id"))
-st.write(pd.DataFrame(wagging_data).set_index("id"))
-
-st.subheader("적절한 팀원 수 추출")
-
-if st.button("팀 매칭 시작"):
-    # 1단계: 팀 구성 요구사항 생성
-    teams_info = get_team_size(participant_list=participant_data)
-
-    if not teams_info:
-        st.error("팀을 생성할 수 없습니다.")
-    else:
-        st.subheader("팀 구성 요구사항")
-        cols = st.columns(len(teams_info))
-        for i, team_info in enumerate(teams_info):
-            with cols[i]:
-                st.write(f"**팀 {i+1}**")
-                for part, count in team_info.items():
-                    st.badge(f"{part}: {count}", color="blue")
-
-        # 2단계: 초기 랜덤 팀 생성 및 점수 계산
-        st.subheader("1️⃣ 초기 랜덤 팀 매칭 결과")
-        initial_teams = random_team_assignment(participant_data, teams_info)
-        initial_score = evaluate_solution(initial_teams, wagging_data)
-
-        st.metric("초기 팀 점수", f"{initial_score:.4f}", delta="시작점")
-
-        # 초기 팀 명단 표시
-        with st.expander("초기 팀 명단 보기"):
-            for i, team in enumerate(initial_teams):
-                st.write(f"**팀 {team['id']}**")
-                display_team_members(team, teams_info)
-                st.divider()
-
-        # 3단계: Simulated Annealing 실행 및 시각화
-        st.subheader("2️⃣ Simulated Annealing 최적화 진행 중...")
-
-        # 진행 상황 표시 공간
-        progress_placeholder = st.empty()
-        metrics_placeholder = st.empty()
-        chart_placeholder = st.empty()
-
-        # SA 실행 중 실시간 데이터 수집
-        iteration_history = []
-        score_history = []
-        best_score_history = []
-
-        current_solution = initial_teams
-        current_score = initial_score
-        best_solution = current_solution
-        best_score = current_score
-
-        initial_temp = 1.0
-        min_temp = 0.001
-        cooling_rate = 0.995
-        max_iterations = 10000
-
-        T = initial_temp
-        iteration = 0
-
-        while T > min_temp and iteration < max_iterations:
-            # Neighbor 생성
-            new_solution = neighbor_solution(current_solution)
-            new_score = evaluate_solution(new_solution, wagging_data)
-
-            # Score 차이
-            delta = new_score - current_score
-
-            # 더 좋으면 무조건 채택
-            if delta < 0:
-                accept = True
-            else:
-                # 더 나쁜 해는 확률적으로 채택
-                p = math.exp(-delta / T) if T > 0 else 0
-                accept = random.random() < p
-
-            if accept:
-                current_solution = new_solution
-                current_score = new_score
-
-            # Best 업데이트
-            if current_score < best_score:
-                best_solution = current_solution
-                best_score = current_score
-
-            # 데이터 수집
-            iteration_history.append(iteration)
-            score_history.append(current_score)
-            best_score_history.append(best_score)
-
-            # 진행 상황 표시 (매 100회 반복마다)
-            if iteration % 100 == 0:
-                with progress_placeholder:
-                    st.progress(min(iteration / max_iterations, 1.0))
-
-                with metrics_placeholder:
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("반복 횟수", f"{iteration:,}")
-                    with col2:
-                        st.metric("현재 점수", f"{current_score:.4f}")
-                    with col3:
-                        st.metric("최고 점수", f"{best_score:.4f}")
-                    with col4:
-                        st.metric("온도", f"{T:.6f}")
-
-                with chart_placeholder:
-                    df = pd.DataFrame(
+                # 팀원 목록
+                st.subheader("팀원 목록")
+                member_list = []
+                for member in team:
+                    member_list.append(
                         {
-                            "반복": iteration_history,
-                            "현재 점수": score_history,
-                            "최고 점수": best_score_history,
+                            "ID": member["id"],
+                            "파트": member["part"],
+                            "팀 분위기": member["team_vibe"],
+                            "활동 시간": member["active_hours"],
+                            "회의 방식": member["meeting_preference"],
                         }
                     )
-                    st.line_chart(df.set_index("반복"))
-
-            # 온도 감소
-            T *= cooling_rate
-            iteration += 1
-
-        # 4단계: 최종 결과 표시
-        st.subheader("3️⃣ 최적화 완료 ✨")
-
-        # 성능 비교
-        improvement = (
-            ((initial_score - best_score) / abs(initial_score)) * 100
-            if initial_score != 0
-            else 0
-        )
-
-        result_col1, result_col2, result_col3 = st.columns(3)
-        with result_col1:
-            st.metric("초기 점수", f"{initial_score:.4f}")
-        with result_col2:
-            st.metric("최종 점수", f"{best_score:.4f}")
-        with result_col3:
-            st.metric(
-                "개선도",
-                f"{improvement:.2f}%",
-                delta=f"{best_score - initial_score:.4f}",
-            )
-
-        # 최종 팀 명단
-        st.subheader("최적화된 팀 명단")
-        for i, team in enumerate(best_solution):
-            st.write(f"**팀 {team['id']}**")
-            display_team_members(team, teams_info)
-            st.divider()
-
-        # 최종 그래프
-        st.subheader("최적화 과정")
-        df_final = pd.DataFrame(
-            {
-                "반복": iteration_history,
-                "현재 점수": score_history,
-                "최고 점수": best_score_history,
-            }
-        )
-        st.line_chart(df_final.set_index("반복"))
+                st.dataframe(pd.DataFrame(member_list), use_container_width=True)

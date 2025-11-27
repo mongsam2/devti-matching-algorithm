@@ -33,9 +33,10 @@ def get_category_score(team_list: list[list[dict]]) -> list[dict]:
         team_score = 0  # 한 팀의 카테고리 점수
 
         for key, values in team_similarity.items():
-            most_frequent_value, rate = [
-                (value, team_similarity[key][value]) for value in values
-            ].sorted(key=lambda x: -x[1])[0]
+            most_frequent_value, rate = sorted(
+                [(value, team_similarity[key][value]) for value in values],
+                key=lambda x: -x[1],
+            )[0]
             weight = category_weight[key][most_frequent_value]
             score = rate * weight
             team_score += score
@@ -120,9 +121,19 @@ def _get_category_weight(team_list: list[list[dict]]) -> dict[dict]:
             for key in CATEGORY:
                 category_count[key][member[key]] += 1
 
+    # 카테고리별 가중치 계산
     category_weight = {}
-    for key, values in category_count.items():
+    for (
+        key,
+        values,
+    ) in category_count.items():  # ex) team_vibe, [learning, professional]
         value_total = sum(category_count[key][value] for value in values)
+        category_weight[key] = {}
+
+        if value_total == 0:
+            for value in values:
+                category_weight[key][value] = 0
+            continue
 
         for value in values:
             category_weight[key][value] = 1 - round(
