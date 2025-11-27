@@ -137,6 +137,8 @@ def random_team_assignment(participant_list: list[dict]) -> list[dict]:
         ]
     """
     team_template = _get_team_template(participant_list)
+    if not team_template:
+        raise ValueError("요청하신 개수만큼의 팀을 생성할 수 없습니다.")
 
     part_groups = {part: [] for part in PART_MIN.keys()}
 
