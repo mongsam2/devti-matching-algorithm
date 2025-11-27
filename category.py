@@ -1,3 +1,5 @@
+from math import log
+
 CATEGORY = {
     # element: [name1, name2]
     "team_vibe": ["learning", "professional"],
@@ -26,11 +28,16 @@ def get_category_score(team_list: list[list[dict]]) -> list[dict]:
         - category_score = [0.45, 0.88]
     """
     category_weight = _get_category_weight(team_list)
+    weight_list = []
+    for value_dict in category_weight.values():
+        weight_list.extend(value_dict.values())
+    max_weight = max(weight_list)  # 가장 큰 weight
+
     category_score = []
 
     for team in team_list:
         team_similarity = _get_team_similarity(team)
-        team_score = 0  # 한 팀의 카테고리 점수
+        team_score = 0
 
         for key, values in team_similarity.items():
             most_frequent_value, rate = sorted(
@@ -40,7 +47,7 @@ def get_category_score(team_list: list[list[dict]]) -> list[dict]:
             weight = category_weight[key][most_frequent_value]
             score = rate * weight
             team_score += score
-        team_score = round(team_score / len(team_similarity), 2)
+        team_score = round(team_score / len(team_similarity) / max_weight, 2) * 100
         category_score.append(team_score)
 
     return category_score
@@ -52,17 +59,17 @@ def _get_team_similarity(member_list: list[dict]) -> dict[dict]:
 
     input:
         - member_list = [
-                {member1},
-                {member2},
-                ...
-            ]
+            {member1},
+            {member2},
+            ...
+        ]
 
     return:
         - similarity = {
-                "team_vibe": {"learning": 0.65, "professional": 0.35},
-                "active_hours": {},
-                "meeting_preference: {}
-            }
+            "team_vibe": {"learning": 0.65, "professional": 0.35},
+            "active_hours": {},
+            "meeting_preference: {}
+        }
     """
     team_size = len(member_list)
 
@@ -123,21 +130,20 @@ def _get_category_weight(team_list: list[list[dict]]) -> dict[dict]:
 
     # 카테고리별 가중치 계산
     category_weight = {}
-    for (
-        key,
-        values,
-    ) in category_count.items():  # ex) team_vibe, [learning, professional]
+    participant_count = sum([len(team) for team in team_list])
+
+    # ex) team_vibe, [learning, professional]
+    for key, values in category_count.items():
         value_total = sum(category_count[key][value] for value in values)
         category_weight[key] = {}
 
-        if value_total == 0:
-            for value in values:
-                category_weight[key][value] = 0
-            continue
-
         for value in values:
-            category_weight[key][value] = 1 - round(
-                category_count[key][value] / value_total, 2
-            )
+            # 모든 참가자가 같은 카테고리를 선택한 경우에는 가중치를 1 (만점처리)
+            if category_count[key][value] == participant_count:
+                category_weight[key][value] = 1
+            else:
+                category_weight[key][value] = round(
+                    -log(category_count[key][value] / value_total), 2
+                )
 
     return category_weight
