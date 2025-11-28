@@ -5,7 +5,7 @@ from category import get_category_score
 from wagging import get_wagging_score
 
 
-TEAM_COUNT = 4  # 생성할 팀의 개수
+TEAM_COUNT = 7  # 생성할 팀의 개수
 PART_MIN = {"pm": 0, "de": 1, "fe": 2, "be": 2}  # 파트별 최소 인원수
 
 
@@ -212,46 +212,38 @@ def evaluate_solution(team_list: list[list[dict]], waggings: list[dict] = None):
         ]
 
     return:
-        - score: float (낮을수록 좋음)
+        - score: 알고리즘에 사용되는 점수
     """
 
-    # 1. 카테고리 점수 계산 (높을수록 좋음)
+    # 카테고리 점수 계산 (높을수록 좋음)
     category_scores = get_category_score(team_list)
 
     # 카테고리 점수의 평균과 분산 계산
     # 평균: 전체적인 매칭 품질
     # 분산: 팀 간 균형 (분산이 낮을수록 모든 팀이 고르게 좋음)
-    if len(category_scores) == 0:
-        category_mean = 0
-        category_variance = 0
-    else:
-        category_mean = sum(category_scores) / len(category_scores)
-        category_variance = sum(
-            (score - category_mean) ** 2 for score in category_scores
-        ) / len(category_scores)
+    category_mean = sum(category_scores) / len(category_scores)
+    category_variance = sum(
+        (score - category_mean) ** 2 for score in category_scores
+    ) / len(category_scores)
 
-    # 2. 꼬리흔들기 점수 계산 (높을수록 좋음)
+    # 꼬리흔들기 점수 계산 (높을수록 좋음)
     wagging_scores = []
     if waggings:
         wagging_scores = get_wagging_score(team_list, waggings)
     else:
         wagging_scores = [0] * len(team_list)
 
-    if len(wagging_scores) == 0:
-        wagging_mean = 0
-        wagging_variance = 0
-    else:
-        wagging_mean = sum(wagging_scores) / len(wagging_scores)
-        wagging_variance = sum(
-            (score - wagging_mean) ** 2 for score in wagging_scores
-        ) / len(wagging_scores)
+    wagging_mean = sum(wagging_scores) / len(wagging_scores)
+    wagging_variance = sum(
+        (score - wagging_mean) ** 2 for score in wagging_scores
+    ) / len(wagging_scores)
 
     # 3. 최종 점수 계산 (낮을수록 좋게 변환)
     # 가중치 설정
     w_category_mean = 2.0  # 카테고리 매칭의 평균 품질
-    w_category_var = 1.0  # 팀 간 카테고리 균형
-    w_wagging_mean = 3.0  # 꼬리흔들기 매칭의 평균 품질
-    w_wagging_var = 0.5  # 팀 간 꼬리흔들기 균형
+    w_category_var = 0.1  # 팀 간 카테고리 균형
+    w_wagging_mean = 2.0  # 꼬리흔들기 매칭의 평균 품질
+    w_wagging_var = 0.1  # 팀 간 꼬리흔들기 균형
 
     # 높은 점수를 낮은 비용으로 변환 (음수 사용)
     # 분산은 그대로 사용 (낮을수록 좋음)
