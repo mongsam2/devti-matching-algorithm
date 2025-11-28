@@ -157,10 +157,10 @@ if st.session_state.get("matching_done", False):
     score_df = pd.DataFrame(
         {
             "팀": [f"Team {i+1}" for i in range(len(initial_teams))],
-            "초기 카테고리 점수": initial_category_scores,
-            "최적화 카테고리 점수": optimized_category_scores,
-            "초기 꼬리흔들기 점수": initial_wagging_scores,
-            "최적화 꼬리흔들기 점수": optimized_wagging_scores,
+            "초기 카테고리 점수(100)": initial_category_scores,
+            "최적화 카테고리 점수(100)": optimized_category_scores,
+            "초기 꼬리흔들기 일치도(%)": initial_wagging_scores,
+            "최적화 꼬리흔들기 일치도(%)": optimized_wagging_scores,
         }
     )
 
