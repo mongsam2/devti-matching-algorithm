@@ -29,7 +29,7 @@ def _get_wagging_dict(waggings: list[dict]) -> dict[set]:
     return wagging_dict
 
 
-def get_wagging_score(team_list, waggings, weight=3) -> list:
+def get_wagging_score(team_list, waggings) -> list:
     """
     모든 팀의 꼬리흔들기 점수를 담은 리스트 반환
 
@@ -97,10 +97,9 @@ def get_wagging_score(team_list, waggings, weight=3) -> list:
 
         team_size = len(team)
         pair_count = team_size * (team_size - 1) // 2
-        team_score = round(
-            (single_wagging_count * weight + double_wagging_count * weight**2)
-            / pair_count,
-            2,
+        team_score = (
+            round((single_wagging_count + double_wagging_count * 2) / pair_count, 2)
+            * 100
         )
         wagging_score.append(team_score)
 
