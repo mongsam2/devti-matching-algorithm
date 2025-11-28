@@ -96,9 +96,9 @@ def get_wagging_score(team_list, waggings) -> list:
                     single_wagging_count += 1
 
         team_size = len(team)
-        pair_count = team_size * (team_size - 1) // 2
+        pair_count = team_size * (team_size - 1) // 2  # 팀 개수는 반드시 1 이상
         team_score = (
-            round((single_wagging_count + double_wagging_count * 2) / pair_count, 2)
+            round((single_wagging_count * 0.5 + double_wagging_count) / pair_count, 2)
             * 100
         )
         wagging_score.append(team_score)
