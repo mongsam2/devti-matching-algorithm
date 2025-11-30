@@ -136,16 +136,20 @@ if st.session_state.get("matching_done", False):
     initial_category_scores = get_category_score(initial_teams)
     optimized_category_scores = get_category_score(optimized_teams)
 
-    initial_wagging_scores = get_wagging_score(initial_teams, waggings)
-    optimized_wagging_scores = get_wagging_score(optimized_teams, waggings)
+    initial_wagging_scores, initial_team_wagging = get_wagging_score(
+        initial_teams, waggings
+    )
+    optimized_wagging_scores, optimized_team_wagging = get_wagging_score(
+        optimized_teams, waggings
+    )
 
     score_df = pd.DataFrame(
         {
             "팀": [f"Team {i+1}" for i in range(len(initial_teams))],
             "초기 카테고리 점수(100)": initial_category_scores,
             "최적화 카테고리 점수(100)": optimized_category_scores,
-            "초기 꼬리흔들기 일치도(%)": initial_wagging_scores,
-            "최적화 꼬리흔들기 일치도(%)": optimized_wagging_scores,
+            "초기 꼬리흔들기 매칭 일치도(%)": initial_team_wagging,
+            "최적화 꼬리흔들기 매칭 일치도(%)": optimized_team_wagging,
         }
     )
 
@@ -262,13 +266,17 @@ if st.session_state.get("matching_done", False):
 
                 # 팀원별 꼬리흔들기 정보 추가
                 st.subheader("팀원별 꼬리흔들기 현황")
-                # 팀원 id 리스트
                 team_ids = [m["id"] for m in team]
-                # 팀원별 내가 꼬리 흔든 팀원
                 wagging_info = []
-                for member in team:
+
+                # 현재 팀의 개별 wagging 점수 가져오기
+                team_start_idx = sum(len(optimized_teams[i]) for i in range(team_idx))
+                individual_wagging_scores = optimized_wagging_scores[
+                    team_start_idx : team_start_idx + len(team)
+                ]
+
+                for idx, member in enumerate(team):
                     my_id = member["id"]
-                    # 내가 꼬리 흔든 대상 중, 내 팀원만 추출
                     my_waggees = [
                         w["waggee"]
                         for w in waggings
@@ -282,6 +290,7 @@ if st.session_state.get("matching_done", False):
                                 if my_waggees
                                 else "-"
                             ),
+                            "팀원 중 적중수": individual_wagging_scores[idx],
                         }
                     )
                 st.dataframe(pd.DataFrame(wagging_info), use_container_width=True)
