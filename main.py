@@ -218,34 +218,38 @@ if st.session_state.get("matching_done", False):
 
             with col2:
                 # 성격 유형 분포
-                st.subheader("평균 성격 특성")
-                personality_traits = {
-                    "openness": [],
-                    "conscientiousness": [],
-                    "extraversion": [],
-                    "agreeableness": [],
-                    "neuroticism": [],
+                st.subheader("평균 MBTI 특성")
+                mbti_traits = {
+                    "ei": [],
+                    "sn": [],
+                    "tf": [],
+                    "jp": [],
                 }
 
                 for member in team:
-                    for trait in personality_traits.keys():
-                        personality_traits[trait].append(member[trait])
+                    for trait in mbti_traits.keys():
+                        mbti_traits[trait].append(member[trait])
 
                 avg_traits = {
                     trait: sum(values) / len(values)
-                    for trait, values in personality_traits.items()
+                    for trait, values in mbti_traits.items()
                 }
 
                 fig_personality = go.Figure(
                     data=go.Scatterpolar(
                         r=list(avg_traits.values()),
-                        theta=["개방성", "성실성", "외향성", "친화성", "신경성"],
+                        theta=[
+                            "외향성(E)-내향성(I)",
+                            "직관(N)-감각(S)",
+                            "감정(F)-사고(T)",
+                            "인식(P)-판단(J)",
+                        ],
                         fill="toself",
                     )
                 )
                 fig_personality.update_layout(
                     polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-                    title=f"Team {team_idx + 1} 평균 성격 특성",
+                    title=f"Team {team_idx + 1} 평균 MBTI 특성",
                 )
                 st.plotly_chart(fig_personality, use_container_width=True)
 
