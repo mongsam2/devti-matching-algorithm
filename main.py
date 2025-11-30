@@ -130,21 +130,6 @@ if st.session_state.get("matching_done", False):
     optimized_teams = st.session_state["optimized_teams"]
     optimized_score = st.session_state["optimized_score"]
 
-    # 점수 비교
-    st.subheader("🎯 매칭 점수 비교")
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric("초기 매칭 점수", f"{initial_score:.4f}")
-    with col2:
-        st.metric("최적화 후 점수", f"{optimized_score:.4f}")
-    with col3:
-        if initial_score != 0:
-            improvement = ((initial_score - optimized_score) / abs(initial_score)) * 100
-            st.metric("개선율", f"{improvement:.2f}%")
-        else:
-            st.metric("개선율", "N/A")
-
     # 팀별 점수 비교
     st.subheader("팀별 점수 상세 비교")
 
@@ -274,3 +259,29 @@ if st.session_state.get("matching_done", False):
                         }
                     )
                 st.dataframe(pd.DataFrame(member_list), use_container_width=True)
+
+                # 팀원별 꼬리흔들기 정보 추가
+                st.subheader("팀원별 꼬리흔들기 현황")
+                # 팀원 id 리스트
+                team_ids = [m["id"] for m in team]
+                # 팀원별 내가 꼬리 흔든 팀원
+                wagging_info = []
+                for member in team:
+                    my_id = member["id"]
+                    # 내가 꼬리 흔든 대상 중, 내 팀원만 추출
+                    my_waggees = [
+                        w["waggee"]
+                        for w in waggings
+                        if w["wagger"] == my_id and w["waggee"] in team_ids
+                    ]
+                    wagging_info.append(
+                        {
+                            "ID": my_id,
+                            "내가 꼬리 흔든 팀원": (
+                                ", ".join(str(wid) for wid in my_waggees)
+                                if my_waggees
+                                else "-"
+                            ),
+                        }
+                    )
+                st.dataframe(pd.DataFrame(wagging_info), use_container_width=True)
