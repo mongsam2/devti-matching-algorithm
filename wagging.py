@@ -1,7 +1,3 @@
-# TODO:
-# - 팀에 꼬리를 흔든 사람이 한 명도 없는 경우가 생기면 큰 감점이 필요.
-
-
 def _get_wagging_dict(waggings: list[dict]) -> dict[set]:
     """
     Wagging 테이블 데이터를 받아서 {꼬리 흔들기 주체: [꼬리를 흔든 대상 리스트]} 형식으로 변환
