@@ -6,6 +6,7 @@ import pandas as pd
 from matching import random_team_assignment, simulated_annealing, evaluate_solution
 from category import get_category_score
 from wagging import get_wagging_score
+from explain import get_matching_explanations
 
 # 페이지 설정
 st.set_page_config(page_title="팀 매칭 알고리즘 데모", layout="wide")
@@ -110,11 +111,15 @@ if st.button("매칭 시작", type="primary", use_container_width=True):
             max_iterations=10000,
         )
 
+        # 매칭 이유 생성
+        matching_reasons = get_matching_explanations(optimized_teams)
+
         # 세션 상태에 저장
         st.session_state["initial_teams"] = initial_teams
         st.session_state["initial_score"] = initial_score
         st.session_state["optimized_teams"] = optimized_teams
         st.session_state["optimized_score"] = optimized_score
+        st.session_state["matching_reasons"] = matching_reasons
         st.session_state["matching_done"] = True
 
     st.success("매칭 완료!")
@@ -159,8 +164,19 @@ if st.session_state.get("matching_done", False):
     st.markdown("---")
     st.header("👥 팀별 상세 정보")
 
+    matching_reasons = st.session_state.get("matching_reasons", [])
+
     for team_idx, team in enumerate(optimized_teams):
         with st.expander(f"Team {team_idx + 1} 상세 정보"):
+            # 매칭 이유 섹션 추가
+            st.subheader("💡 매칭 이유")
+            if team_idx < len(matching_reasons):
+                st.write(matching_reasons[team_idx].reason)
+            else:
+                st.write("매칭 이유를 생성할 수 없습니다.")
+
+            st.markdown("---")
+
             col1, col2 = st.columns(2)
 
             with col1:
@@ -261,6 +277,7 @@ if st.session_state.get("matching_done", False):
                         {
                             "ID": member["id"],
                             "파트": member["part"],
+                            "DEVTI": member["devti"],
                             "팀 분위기": member["team_vibe"],
                             "활동 시간": member["active_hours"],
                             "회의 방식": member["meeting_preference"],
