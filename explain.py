@@ -157,6 +157,6 @@ def get_matching_explanations(team_list):
     with open("sample_data/wagging.json", "r", encoding="utf-8") as f:
         waggings = json.load(f)
     team_info_list = _get_team_info_list(team_list, waggings)
-    response = call_llm("gpt", team_info_list)
+    response = call_llm(team_info_list)
 
     return response
